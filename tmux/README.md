@@ -43,6 +43,7 @@ Ctrl+B+D               ← грешно: не задържай всичко ед
 sudo apt install tmux      # Debian / Ubuntu
 brew install tmux           # macOS
 ```
+ **Важно:** За целта на курса НЕ трябва да инсталирате tmux на astero сървъра.
 
 ---
 
