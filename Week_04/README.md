@@ -4,7 +4,7 @@
 
 1. [Стрингове и изход — echo, `""`, `''`](#strings-bash)
 2. [Заместване — `$()` и `$(())`](#replace)
-3. [Помощни команди — sort, tar, tr, cut, df](#helper-commands)
+3. [Помощни команди — sort, tr, cut, df](#helper-commands)
 4. [xargs — превръщане на изход в аргументи](#xargs)
 5. [Обработка на текст — grep, sed, awk](#string-editing)
 
@@ -278,10 +278,10 @@ ls -l | cut -c1-10                   # само правата от ls -l
  
 ```bash
 # Проблемът: find намери файловете, но rm не чете от stdin
-find . -name "*.tmp" | rm          # ⚠️  не работи — rm не чете от pipe
+find . -name "*.tmp" | rm          # ✗  не работи — rm не чете от pipe
  
 # Решението с xargs:
-find . -name "*.tmp" | xargs rm    # ✅  xargs взима пътищата и ги подава на rm
+find . -name "*.tmp" | xargs rm    # ✓  xargs взима пътищата и ги подава на rm
 ```
  
 Без `xargs` единствената алтернатива е `-exec` при `find`, но `xargs` е по-гъвкав и работи с всяка команда.
@@ -372,10 +372,10 @@ cat urls.txt | xargs -P 8 -I {} curl -O {}
  
 ```bash
 # Проблем — файл "my document.txt" се разбива
-find . -name "*.txt" | xargs rm                  # ⚠️  "my" и "document.txt" се третират отделно
+find . -name "*.txt" | xargs rm                  # ✗  "my" и "document.txt" се третират отделно
  
 # Решение — нулев байт като разделител
-find . -name "*.txt" -print0 | xargs -0 rm       # ✅  работи с всякакви имена
+find . -name "*.txt" -print0 | xargs -0 rm       # ✓  работи с всякакви имена
 find . -name "*.txt" -print0 | xargs -0 -I {} cp {} /backup/
 ```
  
@@ -489,7 +489,6 @@ grep -E "^[A-Z]" file.txt         # редове, започващи с глав
 
 # В комбинация с pipe
 cat access.log | grep "404" | wc -l          # брой 404 грешки
-ps aux | grep nginx                           # търси nginx процес
 cat /etc/passwd | grep -v "^#" | cut -d: -f1 # потребителите без коментари
 ```
 
