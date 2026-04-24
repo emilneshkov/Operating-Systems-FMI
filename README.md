@@ -9,7 +9,8 @@
 - [Тема 5](./Week_05): Процеси — ps, pstree, w. Сравнение на файлове — diff, comm. Process substitution — `<(command)`
 - [Тема 6](./Week_06): Bash скриптове — shebang, стартиране. Променливи и environment variables. Аргументи и специални променливи. Условия (if), цикли (for, while). Exit кодове и обработка на грешки
 - [Тема 7](./Week_07): Процеси в дълбочина — fork и exec. Сигнали — kill, SIGTERM, SIGKILL. Background процеси — &, jobs, fg, bg. Архивиране — tar
-- [Тема 8]
+---
+- [Тема 8](./Week_08): Userland и ядро — API/ABI. Компилатор и машинни инструкции. Syscall — номера, регистри, заявки към ядрото. Шестнадесетична бройна система и байтове. Little/Big endian. Magic numbers. File descriptors — open, read, write, close. Битови операции и shift
 - [Тема 9]
 - [Тема 10]
 - [Тема 11]
