@@ -11,7 +11,7 @@
 7. [Magic numbers](#magic-numbers)
 8. [File Descriptors](#fd)
 9. [open(), read(), write(), close()](#file-ops)
-10. [`dprintf` — форматирано писане към FD](#dprintf)
+10. [dprintf — форматирано писане към FD](#dprintf)
 11. [Битови операции и shift](#битови-операции)
 
 ---
