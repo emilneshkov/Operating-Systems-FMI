@@ -31,16 +31,16 @@ PROG= main
 OBJS= main.o
 SRCS= main.c
 
-all: ${PROG}
+all:        ${PROG}
 
-${PROG}: ${OBJS}
-${CC} ${LDFLAGS} -o ${PROG} ${OBJS}
+${PROG}:    ${OBJS}
+            ${CC} ${LDFLAGS} -o ${PROG} ${OBJS}
 
-${OBJS}: ${SRCS}
-${CC} ${CPPFLAGS} ${CFLAGS} -c -o ${OBJS} ${SRCS}
+${OBJS}:    ${SRCS}
+            ${CC} ${CPPFLAGS} ${CFLAGS} -c -o ${OBJS} ${SRCS}
 
 clean:
-${RM} -- ${OBJS} ${PROG}
+            ${RM} -- ${OBJS} ${PROG}
 
 .PHONY: all clean
 ```
