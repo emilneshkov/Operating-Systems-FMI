@@ -14,7 +14,7 @@
 
 - [Тема 8](./Week_08): Userland и ядро — API/ABI. Компилатор и машинни инструкции. Syscall — номера, регистри, заявки към ядрото. Шестнадесетична бройна система и байтове. Little/Big endian. Magic numbers. File descriptors — open, read, write, close. dprintf. Битови операции и shift
 - [Тема 9](./Week_09/): Грешки в C — errno. err и errx. Навигация във файлове — lseek. Метаданни — stat, fstat, lstat. Структури (struct) и packed structs
-- [Тема 10]
+- [Тема 10](./Week_10/): Процеси — дърво на процесите, адресно пространство, fork, exec, wait, сигнали и context switching.
 - [Тема 11]
 - [Тема 12]
 - [Тема 13]
