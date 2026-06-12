@@ -8,7 +8,7 @@
 - [Тема 4](./Week_04): Стрингове и изход - echo. Заместване — `$()` и `$(())`. Помощни команди — sort, tr, cut. Обработка на текст — grep, sed, awk. Регулярни изрази. Vim
 - [Тема 5](./Week_05): Процеси — ps, pstree, w. Сравнение на файлове — diff, comm. Process substitution — `<(command)`
 - [Тема 6](./Week_06): Bash скриптове — shebang, стартиране. Променливи и environment variables. Аргументи и специални променливи. Условия (if), цикли (for, while). Exit кодове и обработка на грешки
-- [Тема 7](./Week_07): Процеси в дълбочина — fork и exec. Сигнали — kill, SIGTERM, SIGKILL. Background процеси — &, jobs, fg, bg. Архивиране — tar
+- [Тема 7](./Week_07): Процеси в дълбочина — fork и exec. Сигнали — kill, SIGTERM, SIGKILL. Background процеси — &, jobs, fg, bg. Parameter expansion — ${ }. Динамично изпълнение — eval. Архивиране — tar
 
 ---
 
@@ -16,8 +16,6 @@
 - [Тема 9](./Week_09/): Грешки в C — errno. err и errx. Навигация във файлове — lseek. Метаданни — stat, fstat, lstat. Структури (struct) и packed structs
 - [Тема 10](./Week_10/): Процеси — дърво на процесите, адресно пространство, fork, exec, wait, сигнали и context switching.
 - [Тема 11]
-- [Тема 12]
-- [Тема 13]
 
 ---
 

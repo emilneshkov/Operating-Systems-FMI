@@ -5,7 +5,9 @@
 1. [fork, exec и раждането на процесите](#fork-exec)
 2. [Сигнали към процеси — `kill` и `SIGTERM`](#signals)
 3. [Background режим — `&`, `jobs`, `fg`, `bg`](#background)
-4. [Архивиране с `tar`](#tar)
+4. [Parameter expansion — `${}`](#parameter-expansion)
+5. [`eval` — динамично изпълнение](#eval)
+6. [Архивиране с `tar`](#tar)
 
 ---
 
@@ -339,6 +341,275 @@ tail -f tar.log         # следи лога в реално време
 kill -SIGSTOP $!        # спри backup процеса
 kill -SIGCONT $!        # продължи backup процеса
 ```
+
+---
+
+<a id="parameter-expansion"></a>
+
+## Parameter expansion — `${}`
+
+**Parameter expansion** е механизмът на bash за работа с променливи. Базовото `$var` е само началото — `${}` отключва цял набор от операции директно в shell-а, без нужда от външни команди.
+
+### Основен синтаксис
+
+```bash
+var="hello"
+
+echo $var          # hello  — основен достъп
+echo ${var}        # hello  — еквивалентно, но по-безопасно
+echo "${var}"      # hello  — с кавички (препоръчително винаги)
+```
+
+Фигурните скоби стават задължителни при:
+
+```bash
+file="report"
+echo "$filelog"     # грешка — bash търси $filelog
+echo "${file}log"   # правилно — reportlog
+```
+
+### Стойности по подразбиране
+
+```bash
+# ${var:-default}  — ако var е празна или незададена, използвай default
+echo "${name:-anonymous}"       # anonymous (ако $name е празна)
+
+# ${var:=default}  — ако var е празна, задай й стойността и я върни
+echo "${name:=anonymous}"       # задава $name="anonymous" и връща "anonymous"
+
+# ${var:+value}    — ако var Е зададена, върни value (иначе празно)
+echo "${name:+hello $name}"     # "hello ivan" ако $name е зададена
+
+# ${var:?message}  — ако var е празна, печатай грешка и излез
+echo "${input:?Грешка: не е подаден вход}"
+```
+
+Типична употреба в скриптове:
+
+```bash
+#!/usr/bin/env bash
+
+# Вземи аргумент или използвай стойност по подразбиране
+output="${1:-output.txt}"
+mode="${2:-644}"
+
+echo "Записвам в: $output с права $mode"
+```
+
+### Дължина на низ
+
+```bash
+str="Hello, World"
+
+echo "${#str}"          # 12 — брой символи
+echo "${#array[@]}"     # брой елементи в масив
+```
+
+### Изрязване на низ (substring)
+
+```bash
+str="Hello, World"
+
+echo "${str:7}"         # World — от позиция 7 до края
+echo "${str:7:5}"       # World — 5 символа от позиция 7
+echo "${str: -5}"       # orld! — последните 5 символа (с интервал пред -)
+```
+
+### Премахване на prefix и suffix (pattern matching)
+
+```bash
+file="archive.tar.gz"
+
+# Премахни най-краткото съвпадение от НАЧАЛОТО (#)
+echo "${file#*.}"       # tar.gz  (премахва "archive.")
+
+# Премахни най-дългото съвпадение от НАЧАЛОТО (##)
+echo "${file##*.}"      # gz      (премахва "archive.tar.")
+
+# Премахни най-краткото съвпадение от КРАЯ (%)
+echo "${file%.*}"       # archive.tar  (премахва ".gz")
+
+# Премахни най-дългото съвпадение от КРАЯ (%%)
+echo "${file%%.*}"      # archive      (премахва ".tar.gz")
+```
+
+Практически пример — вземи basename и разширение:
+
+```bash
+path="/home/ivan/report.pdf"
+
+filename="${path##*/}"      # report.pdf  (премахва пътя)
+basename="${filename%.*}"   # report      (премахва разширението)
+ext="${filename##*.}"       # pdf         (само разширението)
+
+echo "$basename"    # report
+echo "$ext"         # pdf
+```
+
+### Замяна в низ
+
+```bash
+str="hello world hello"
+
+echo "${str/hello/hi}"      # hi world hello      — замени първото съвпадение
+echo "${str//hello/hi}"     # hi world hi          — замени ВСИЧКИ съвпадения
+echo "${str/#hello/hi}"     # hi world hello       — замени само ако е в началото
+echo "${str/%hello/hi}"     # hello world hi       — замени само ако е в края
+```
+
+### Промяна на регистър
+
+```bash
+str="Hello World"
+
+echo "${str,,}"     # hello world   — всичко малки
+echo "${str^^}"     # HELLO WORLD   — всичко главни
+echo "${str,}"      # hEllo World   — само първата буква малка
+echo "${str^}"      # Hello World   — само първата буква главна
+```
+
+### Индиректна референция — `${!var}`
+
+```bash
+# ${!var} — стойността на променливата, чието ИМЕ е в $var
+fruit="apple"
+var="fruit"
+
+echo "${!var}"      # apple  — bash чете $fruit
+
+# Полезно за динамичен достъп до променливи
+for name in HOME USER SHELL; do
+    echo "$name = ${!name}"
+done
+# HOME = /home/ivan
+# USER = ivan
+# SHELL = /bin/bash
+```
+
+### Бърза справка
+
+| Синтаксис | Описание |
+| --- | --- |
+| `${var}` | Стойността на `var` |
+| `${#var}` | Дължина на низа |
+| `${var:-default}` | Стойност или default ако е празна |
+| `${var:=default}` | Задай default ако е празна |
+| `${var:?msg}` | Грешка и изход ако е празна |
+| `${var:offset}` | Substring от offset |
+| `${var:offset:len}` | Substring с дължина |
+| `${var#pattern}` | Премахни кратък prefix |
+| `${var##pattern}` | Премахни дълъг prefix |
+| `${var%pattern}` | Премахни кратък suffix |
+| `${var%%pattern}` | Премахни дълъг suffix |
+| `${var/old/new}` | Замени първо съвпадение |
+| `${var//old/new}` | Замени всички съвпадения |
+| `${var,,}` | Малки букви |
+| `${var^^}` | Главни букви |
+| `${!var}` | Индиректна референция |
+
+---
+
+<a id="eval"></a>
+
+## `eval` — динамично изпълнение
+
+`eval` приема низ и го **изпълнява като bash команда**. Bash парсира и изпълнява низа сякаш е написан директно в скрипта.
+
+```bash
+eval "команда"
+eval $variable
+```
+
+### Как работи
+
+```bash
+cmd="ls -la"
+eval "$cmd"         # изпълнява: ls -la
+
+# Без eval:
+echo "$cmd"         # просто печата: ls -la
+$cmd                # работи за прости команди, но не за сложни
+```
+
+```bash
+# eval минава през два кръга на парсиране:
+# 1. bash разгъва $variable
+# 2. bash изпълнява резултата като команда
+
+var="World"
+eval echo "Hello, \$var"    # Hello, World
+#          └── \$ — escape-ван за втория кръг на парсиране
+```
+
+### Динамично изграждане на команди
+
+```bash
+# Динамично избиране на команда
+action="create"
+target="backup"
+
+if [ "$action" = "create" ]; then
+    cmd="tar -caf ${target}.tar.xz ."
+elif [ "$action" = "extract" ]; then
+    cmd="tar -xf ${target}.tar.xz"
+fi
+
+eval "$cmd"
+```
+
+### Динамично задаване на променливи
+
+```bash
+# Задай променлива с динамично ime
+for i in 1 2 3; do
+    eval "VAR_$i=$((i * 10))"
+done
+
+echo $VAR_1     # 10
+echo $VAR_2     # 20
+echo $VAR_3     # 30
+```
+
+### `eval` с `getopts` резултати
+
+```bash
+# Типична употреба — парсиране на сложни аргументи
+options=$(getopt -o vf: -- "$@")
+eval set -- "$options"
+# eval set -- преподрежда $@ с правилно quote-нати аргументи
+```
+
+### ⚠️ Сигурност — никога с потребителски вход
+
+`eval` е **опасен** когато низът идва от потребителя или от ненадеждни източници:
+
+```bash
+# ОПАСНО — никога така
+read -p "Въведи команда: " user_input
+eval "$user_input"
+# потребителят може да въведе: rm -rf / или всяка друга команда
+```
+
+```bash
+# Алтернативи на eval за безопасно динамично поведение:
+
+# 1. Масиви вместо eval за команди
+cmd=(tar -caf backup.tar.xz .)
+"${cmd[@]}"         # безопасно изпълнение
+
+# 2. ${!var} за индиректен достъп до променливи (вместо eval)
+name="HOME"
+echo "${!name}"     # /home/ivan — без eval
+
+# 3. declare за динамично задаване
+declare "VAR_$i=$value"    # по-безопасно от eval "VAR_$i=$value"
+```
+
+### Кога `eval` е оправдан
+
+- Парсиране на изхода на `getopt`/`getops` — стандартна употреба
+- Генериране на код в build системи или metaprogramming скриптове
+- Когато входът е **изцяло под твой контрол** и е невъзможно да дойде от потребител
 
 ---
 
