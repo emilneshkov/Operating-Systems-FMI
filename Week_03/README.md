@@ -274,6 +274,96 @@ readlink web              # показва накъде сочи symlink-ът
 readlink -f web           # показва абсолютния реален път (resolve all)
 ```
 
+### `stat` — подробна информация за файл
+
+`stat` показва **всички метаданни**, съхранени в inode-а на файла — тип, права, собственик, размер, timestamps, брой hard links и самия inode номер. Изключително полезна команда за диагностика на файлове и линкове.
+
+```bash
+stat file.txt
+```
+
+Примерен изход:
+```
+  File: file.txt
+  Size: 1024            Blocks: 8          IO Block: 4096   regular file
+Device: 803h/2051d       Inode: 42831       Links: 1
+Access: (0644/-rw-r--r--)  Uid: ( 1000/   ivan)   Gid: ( 1000/   ivan)
+Access: 2026-03-17 10:22:00.000000000 +0200
+Modify: 2026-03-17 09:15:32.000000000 +0200
+Change: 2026-03-17 09:15:32.000000000 +0200
+ Birth: 2026-03-10 08:00:00.000000000 +0200
+```
+
+- **`Inode`** — уникалният номер на inode-а (същият, който показва `ls -li`)
+- **`Links`** — брой hard links, сочещи към този inode
+- **`Access` / `Modify` / `Change`** — съответно `atime`, `mtime`, `ctime`
+
+`stat` е особено полезна за разпознаване на symlink спрямо обикновен файл — при symlink типът е `symbolic link`, а не `regular file`:
+
+```bash
+stat shortcut
+#   File: shortcut -> /home/ivan/notes.txt
+#   Size: 26              Blocks: 0          IO Block: 4096   symbolic link
+# Inode: 43001       Links: 1
+```
+
+`stat` поддържа и собствен `--format`/`-c` за форматиран изход, аналогично на `find -printf`:
+
+```bash
+stat -c "%n %i %h %s" file.txt      # име, inode, брой links, размер
+stat --format="%F"  file.txt        # тип на файла (напр. "regular file")
+stat -c "%a %U %G" file.txt         # права (octal), собственик, група
+```
+
+| `-c` формат | Значение |
+|-------------|----------|
+| `%n` | име на файла |
+| `%i` | inode номер |
+| `%h` | брой hard links |
+| `%s` | размер в байтове |
+| `%F` | тип на файла в текстов вид |
+| `%a` | права в octal |
+| `%U` / `%G` | собственик / група |
+| `%x` / `%y` / `%z` | atime / mtime / ctime |
+
+```bash
+# Сравнение с ls -li за проверка на hard link
+stat -c "%n -> inode %i, links %h" fileA fileB
+# fileA -> inode 42831, links 2
+# fileB -> inode 42831, links 2   ← същият inode = hard link
+```
+
+### `realpath` — намиране на абсолютния реален път
+
+`realpath` разрешава (resolve) даден път до неговата **абсолютна, канонична форма** — премахва `..`, `.`, множество символни връзки и връща истинското местоположение на файла на диска. Върши подобна работа на `readlink -f`, но е самостоятелна команда, специално създадена за целта.
+
+```bash
+realpath file.txt                 # абсолютен път от текущата директория
+realpath ../notes/../file.txt     # разрешава .. и . до чист абсолютен път
+realpath shortcut                 # ако shortcut е symlink — показва реалната цел
+```
+
+```bash
+cd /home/ivan/projects
+realpath .                        # /home/ivan/projects
+realpath ../                      # /home/ivan
+```
+
+| Флаг | Значение |
+|------|----------|
+| `-e`, `--canonicalize-existing` | грешка, ако пътят не съществува |
+| `-m`, `--canonicalize-missing` | не изисква пътят да съществува |
+| `-s`, `--strip` | не разрешава символните връзки, само `.`/`..` |
+| `--relative-to=DIR` | показва пътя релативно спрямо DIR |
+
+```bash
+realpath -e missing_file.txt      # грешка: No such file or directory
+realpath --relative-to=/home/ivan /home/ivan/projects/web
+# projects/web
+```
+
+> **`realpath` vs `readlink -f`:** И двете разрешават symlinks до крайната цел, но `realpath` има повече опции (`--relative-to`, `-m` за несъществуващи пътища) и е по-четимо име за целта. `readlink` е по-скоро предназначена за четене на *единичен* symlink, докато `realpath` е специализирана точно за нормализиране на пътища.
+
 > **Добра практика:** При създаване на symlinks използвай абсолютни пътища, за да избегнеш счупени линкове при преместване.
 
 ---
@@ -487,6 +577,52 @@ find . -type l -printf "%p -> %l\n"
 # Намери дублирани конфигурационни файлове
 find /etc -name "*.conf" -maxdepth 2 -printf "%f\t%p\n" | sort
 ```
+
+### `find` с `-printf` при работа с hard link / symlink
+
+Когато търсиш файлове и искаш едновременно да видиш **inode номера**, **брой hard links** и (ако е symlink) **накъде сочи**, комбинацията `find ... -printf '%i %n %l\n'` е много удобна — дава ти наведнъж цялата информация, нужна за разпознаване на връзки, без да викаш `stat` за всеки файл поотделно.
+
+```bash
+find . -printf '%i %n %l\n'
+```
+
+| Placeholder | Значение |
+|-------------|----------|
+| `%i` | inode номер на файла |
+| `%n` | брой hard links, сочещи към inode-а |
+| `%l` | целта на symbolic link (празно за обикновени файлове) |
+
+```bash
+find . -printf '%i %n %p -> %l\n'
+# 42831 2 ./fileA ->
+# 42831 2 ./fileB ->
+# 43001 1 ./shortcut -> /home/ivan/notes.txt
+```
+
+**Как да разчетеш резултата:**
+
+- Ако два реда имат **еднакъв inode номер** (`%i`) и `%n` > 1 → това са **hard links** към един и същ файл (споделят едни и същи данни на диска).
+- Ако `%l` **не е празно** → файлът е **symbolic link**, а стойността показва към какво сочи.
+- Ако `%l` е празно и `%n` = 1 → обикновен файл без допълнителни hard links.
+
+Практически примери за откриване на връзки във файловата система:
+
+```bash
+# Покажи inode, брой links и symlink цел за всичко в директорията
+find . -maxdepth 1 -printf '%i\t%n\t%p\t%l\n'
+
+# Намери всички файлове с повече от 1 hard link (споделят inode с друг файл)
+find . -type f -printf '%n %i %p\n' | awk '$1 > 1'
+
+# Намери всички symlinks и покажи точно накъде сочат (inode + цел)
+find . -type l -printf '%i %p -> %l\n'
+
+# Групирай файлове по inode, за да откриеш кои са hard links един на друг
+find . -type f -printf '%i %p\n' | sort -n
+# Редовете с еднакъв inode в началото са hard links помежду си
+```
+
+> **Защо `%n` (брой links) е полезен:** Когато `stat` показва `Links: 2` за даден файл, това значи, че някъде във файловата система има още едно име, сочещо към същия inode. `find -printf '%n'` ти позволява да провериш това за много файлове наведнъж, вместо да пускаш `stat` на всеки поотделно.
 
 ---
 

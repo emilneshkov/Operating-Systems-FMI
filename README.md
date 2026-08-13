@@ -4,11 +4,11 @@
 
 - [Тема 1](./Week_01): Пътища във файловата система. Навигация и работа с файлове. Права за достъп
 - [Тема 2](./Week_02): Четене на файлове. Работа с man страница
-- [Тема 3](./Week_03): Команди за четене на файлове - head & tail. Файлова система - inode. Линкове - symlink & hard link. Търсене във файловата система - find. Pipes
-- [Тема 4](./Week_04): Стрингове и изход - echo. Заместване — `$()` и `$(())`. Помощни команди — sort, tr, cut. Обработка на текст — grep, sed, awk. Регулярни изрази. Vim
-- [Тема 5](./Week_05): Процеси — ps, pstree, w. Сравнение на файлове — diff, comm. Process substitution — `<(command)`
-- [Тема 6](./Week_06): Bash скриптове — shebang, стартиране. Променливи и environment variables. Аргументи и специални променливи. Условия (if), цикли (for, while). Exit кодове и обработка на грешки
-- [Тема 7](./Week_07): Процеси в дълбочина — fork и exec. Сигнали — kill, SIGTERM, SIGKILL. Background процеси — &, jobs, fg, bg. Parameter expansion — ${ }. Динамично изпълнение — eval. Архивиране — tar
+- [Тема 3](./Week_03): Команди за четене на файлове - `head` & `tail`. Файлова система - inode. Линкове - symlink & hard link, `stat`, `realpath`. Търсене във файловата система - `find`, `find -printf` (`%i %n %l` за hard link/symlink). Pipes
+- [Тема 4](./Week_04): Стрингове и изход - `echo`, `printf`, `date`. Заместване — `$()` и `$(())`, `bc`. Помощни команди — `sort`, `tr`, `cut`, `pwgen`. Обработка на текст — `grep`, `sed`, `awk` (разширени с допълнителни команди и практически примери). Регулярни изрази (BRE/ERE/glob, `find -regextype`). Vim
+- [Тема 5](./Week_05): Процеси — `ps`, `pstree`, `w`. Сравнение на файлове — `diff`, `comm`. Process substitution — `<(command)`
+- [Тема 6](./Week_06): Bash скриптове — shebang, стартиране. Променливи и environment variables. Аргументи и специални променливи. Условия (`if`), цикли (`for`, `while`). Exit кодове и обработка на грешки
+- [Тема 7](./Week_07): Процеси в дълбочина — `fork` и `exec`. Сигнали — `kill`, `SIGTERM`, `SIGKILL`. Background процеси — `&`, `jobs`, `fg`, `bg`. Parameter expansion — `${ }`. Динамично изпълнение — `eval`. Архивиране — `tar`
 
 ---
 
