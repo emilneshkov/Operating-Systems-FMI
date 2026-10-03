@@ -16,8 +16,6 @@
 - [Тема 9](./Week_09/): Грешки в C — errno. err и errx. Навигация във файлове — lseek. Метаданни — stat, fstat, lstat. Структури (struct) и packed structs
 - [Тема 10](./Week_10/): Процеси — дърво на процесите, адресно пространство, fork, exec, wait, сигнали и context switching.
 - [Тема 11](./Week_11/): Pipes — pipe(), unnamed и named pipes (mkfifo). FD таблица в ядрото. Блокиране при read/write. Защо затваряме неизползваните FD — deadlock. Наследяване на FD след fork(). IPC — Inter-Process Communication. dup() и dup2(). Макроси в C — #define, функционални макроси, условна компилация.
-- [Тема 12]
-- [Тема 13]
 
 
 ---
